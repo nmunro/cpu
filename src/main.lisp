@@ -28,12 +28,14 @@
       (move cpu :d0 13)
       (trap cpu memory #xf)
       (move cpu :d0 9)
+
+      (dolist (reg (registers cpu))
+        (format t "~A~%" reg))
+      (format t "~A~%" (locations memory))
+
       (trap cpu memory #xf)
 
+      ; Keeps cpu idling if it wasn't halted
       (do () (nil)
         (nop))
-
-      ;(dolist (reg (registers cpu))
-      ;  (format t "~A~%" reg))
-      ;(format t "~A~%" (locations memory))
       (format t "Done!~%")))
