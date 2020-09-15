@@ -19,8 +19,8 @@
     (format stream "Virtual Machine: ~A/~A " (cpu vm) (memory vm))))
 
 (defun show-registers (vm)
-    (dolist (reg (registers (cpu vm)))
-        (format t "~A~%" reg)))
+  (dolist (reg (registers (cpu vm)))
+    (format t "~A~%" reg)))
 
 (defun show-memory (vm)
-    (format t "~A~%" (locations (memory vm))))
+  (format t "~A~%" (locations (memory vm))))
