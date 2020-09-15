@@ -13,7 +13,7 @@
 
 (defun make-memory (size)
   (let ((base-size 16))
-    (make-instance 'memory :size (* 16 base-size) :locations (make-array `(,base-size ,size)))))
+    (make-instance 'memory :size (* size base-size) :locations (make-array `(,base-size ,size)))))
 
 (defun address (memory index)
   (aref (locations memory) 0 0))
