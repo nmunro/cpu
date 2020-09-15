@@ -1,5 +1,5 @@
 (defpackage cpu.instructions
-  (:use :cl)
+  (:use :cl :cpu.cpu :cpu.memory)
   (:export #:move
            #:lea
            #:nop
@@ -10,38 +10,51 @@
            #:div))
 (in-package :cpu.instructions)
 
-(defgeneric move (cpu location val)
+(defgeneric move (vm location val)
   (:documentation "Moves a value into either memory or a cpu register"))
 
-(defmethod move (cpu (location symbol) val)
-  (setf (cpu.cpu:val (cpu.cpu:register location cpu)) val))
+(defmethod move (vm (location symbol) val)
+  (setf (val (register location (cpu vm))) val))
 
-(defmethod move (memory (location number) val)
+(defmethod move (vm (location number) val)
   (multiple-value-bind (x y)
       (floor location)
-    (setf (aref (cpu.memory:locations memory) y x) val)))
+    (setf (aref (locations (memory vm)) y x) val)))
 
 (defun nop ())
 
-(defun lea (cpu src dest)
-  (setf (cpu.cpu:val (cpu.cpu:register dest cpu)) src))
+(defun lea (vm src dest)
+  (setf (val (register dest (cpu vm))) src))
 
-(defun trap (cpu memory trap-code)
+(defun trap (vm trap-code)
   (when (= #xf trap-code)
-    (let ((trap-task (cpu.cpu:val (cpu.cpu:register :d0 cpu))))
+    (let ((trap-task (val (register :d0 (cpu vm)))))
       (cond
-        ((= 9  trap-task) (cl-user::quit))
-        ((= 13 trap-task) (format t "~A~%" (cpu.memory:address memory (cpu.cpu:val (cpu.cpu:register :d0 cpu)))))
-        ((= 14 trap-task) (format t "~A"   (cpu.memory:address memory (cpu.cpu:val (cpu.cpu:register :d0 cpu)))))))))
+        ((= 9  trap-task)
+         (cl-user::quit))
 
-(defun add (cpu destination source1 source2)
-  (setf (cpu.cpu:val (cpu.cpu:register destination cpu)) (+ (cpu.cpu:val (cpu.cpu:register source1 cpu)) (cpu.cpu:val (cpu.cpu:register source2 cpu)))))
+        ((= 13 trap-task)
+         (format t "~A~%" (address (memory vm) (val (register :d0 (cpu vm))))))
 
-(defun sub (cpu destination source1 source2)
-  (setf (cpu.cpu:val (cpu.cpu:register destination cpu)) (- (cpu.cpu:val (cpu.cpu:register source1 cpu)) (cpu.cpu:val (cpu.cpu:register source2 cpu)))))
+        ((= 14 trap-task)
+         (format t "~A"   (address (memory vm) (val (register :d0 (cpu vm))))))))))
 
-(defun mul (cpu destination source1 source2)
-  (setf (cpu.cpu:val (cpu.cpu:register destination cpu)) (* (cpu.cpu:val (cpu.cpu:register source1 cpu)) (cpu.cpu:val (cpu.cpu:register source2 cpu)))))
+(defun add (vm destination source1 source2)
+  (setf (val    (register destination (cpu vm)))
+        (+ (val (register source1     (cpu vm)))
+           (val (register source2     (cpu vm))))))
 
-(defun div (cpu destination source1 source2)
-  (setf (cpu.cpu:val (cpu.cpu:register destination cpu)) (/ (cpu.cpu:val (cpu.cpu:register source1 cpu)) (cpu.cpu:val (cpu.cpu:register source2 cpu)))))
+(defun sub (vm destination source1 source2)
+  (setf (val    (register destination (cpu vm)))
+        (- (val (register source1     (cpu vm)))
+           (val (register source2     (cpu vm))))))
+
+(defun mul (vm destination source1 source2)
+  (setf (val    (register destination (cpu vm)))
+        (* (val (register source1     (cpu vm)))
+           (val (register source2     (cpu vm))))))
+
+(defun div (vm destination source1 source2)
+  (setf (val    (register destination (cpu vm)))
+        (/ (val (register source1     (cpu vm)))
+           (val (register source2     (cpu vm))))))

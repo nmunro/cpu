@@ -2,6 +2,7 @@
   (:use :cl)
   (:export #:cpu-register
            #:make-register
+           #:make-registers
            #:register
            #:cpu
            #:make-cpu
@@ -17,6 +18,9 @@
 
 (defun make-register (name)
   (make-instance 'cpu-register :name name))
+
+(defun make-registers (&rest names)
+  (mapcar (lambda (name) (make-register name)) names))
 
 (defmethod print-object ((reg cpu-register) stream)
   (print-unreadable-object (reg stream)
