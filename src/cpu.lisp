@@ -22,12 +22,20 @@
 (defun make-registers (&rest names)
   (mapcar (lambda (name) (make-register name)) names))
 
+(defun register (item cpu)
+  (dolist (register (registers cpu))
+    (when (eq item (name register))
+      (return-from register register))))
+
 (defmethod print-object ((reg cpu-register) stream)
   (print-unreadable-object (reg stream)
     (format stream "Register (~A bytes): ~A -> ~A" (size reg) (name reg) (val reg))))
 
 (defclass cpu ()
   ((name              :initarg :name              :initform (error "Must provide a name")            :reader name)
+   (speed             :initarg :speed             :initform (error "Must provide a speed"            :reader speed))
+   (clock-range       :initarg :clock-range       :initform :mhz                                     :reader clock-range)
+   (clock-speed       :initarg :clock-speed       :initform 8                                        :reader clock-speed)
    (registers         :initarg :registers         :initform (error "Must provide registers")         :reader registers)
    (program-counter   :initarg :program-counter   :initform 0                                        :reader program-counter)
    (bit               :initarg :bit               :initform 1                                        :reader bit-length)
@@ -36,14 +44,17 @@
    (word              :initarg :word              :initform 16                                       :reader word-length)
    (long-word         :initarg :long-word         :initform 32                                       :reader long-word-length)))
 
-(defun make-cpu (name registers)
-  (make-instance 'cpu :name name :registers registers))
+(defun make-cpu (name registers speed unit)
+  (cond
+    ((eq unit :hz)
+     (make-instance 'cpu :name name :registers registers :speed (/ speed 1) :clock-range unit :clock-speed speed))
 
-(defun register (item cpu)
-  (dolist (register (registers cpu))
-    (when (eq item (name register))
-      (return-from register register))))
+    ((eq unit :khz)
+     (make-instance 'cpu :name name :registers registers :speed (/ speed 1000) :clock-range unit :clock-speed speed))
+
+    ((eq unit :mhz)
+     (make-instance 'cpu :name name :registers registers :speed (/ speed 1000000) :clock-range unit :clock-speed speed))))
 
 (defmethod print-object ((cpu cpu) stream)
   (print-unreadable-object (cpu stream)
-    (format stream "CPU: ~A, word-length: ~A" (name cpu) (word-length cpu))))
+    (format stream "CPU: ~A (~A ~A), word-length: ~A" (name cpu) (clock-speed cpu) (clock-range cpu) (word-length cpu))))
