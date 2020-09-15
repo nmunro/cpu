@@ -1,6 +1,6 @@
 (defpackage cpu.instructions
   (:use :cl :cpu.cpu :cpu.memory)
-  (:export #:move
+  (:export #:move.b
            #:lea
            #:nop
            #:trap
@@ -10,18 +10,21 @@
            #:div))
 (in-package :cpu.instructions)
 
-(defgeneric move (vm location val)
+(defgeneric move.b (vm location val)
   (:documentation "Moves a value into either memory or a cpu register"))
 
-(defmethod move (vm (location symbol) val)
+(defmethod move.b (vm (location symbol) val)
   (setf (val (register location (cpu vm))) val))
 
-(defmethod move (vm (location number) val)
+(defmethod move.b (vm (location number) val)
   (multiple-value-bind (x y)
       (floor location)
     (setf (aref (locations (memory vm)) y x) val)))
 
-(defun nop ())
+(defun nop (vm))
+
+(defun dc.b (vm label data)
+  0)
 
 (defun lea (vm src dest)
   (setf (val (register dest (cpu vm))) src))

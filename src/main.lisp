@@ -16,11 +16,11 @@
       (format t "| ~A    |~%" vm)
       (format t "+-------------------------------------------------------------------------------------------+~%")
 
-      (move vm #x0 "hello world")
+      (move.b vm #x0 "hello world")
       (lea vm #x0 :a1)
-      (move vm :d0 13)
+      (move.b vm :d0 13)
       (trap vm #xf)
-      (move vm :d0 9)
+      (move.b vm :d0 9)
 
       (show-registers vm)
       ;(show-memory vm)
