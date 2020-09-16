@@ -5,7 +5,8 @@
   :depends-on ()
   :components ((:module "src"
                 :components
-                ((:file "cpu")
+                ((:file "utils")
+                 (:file "cpu")
                  (:file "memory")
                  (:file "vm")
                  (:file "instructions")
