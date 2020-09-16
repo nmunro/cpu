@@ -10,8 +10,20 @@
            #:div))
 (in-package :cpu.instructions)
 
+(defgeneric move (vm location val)
+  (:documentation "Moves a bit sized value into either memory or a cpu register"))
+
+(defgeneric move.n (vm location val)
+  (:documentation "Moves a nybble sized value into either memory or a cpu register"))
+
 (defgeneric move.b (vm location val)
-  (:documentation "Moves a value into either memory or a cpu register"))
+  (:documentation "Moves a bytes sized value into either memory or a cpu register"))
+
+(defgeneric move.w (vm location val)
+  (:documentation "Moves a word sized value into either memory or a cpu register"))
+
+(defgeneric move.l (vm location val)
+  (:documentation "Moves a long-word sized value into either memory or a cpu register"))
 
 (defmethod move.b (vm (location symbol) val)
   (setf (val (register location (cpu vm))) val))
