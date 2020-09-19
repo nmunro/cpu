@@ -9,5 +9,3 @@
 
 (defun hex->char (hex)
   (code-char (coerce hex 'integer)))
-
-(hex->char #x20)
