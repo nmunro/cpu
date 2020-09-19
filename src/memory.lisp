@@ -34,19 +34,19 @@
   (let ((data (aref (locations mem) offset size 0)))
     (format nil "~A" data)))
 
-(defun read-bit (mem offset)
+(defun readbit (mem offset)
   0)
 
-(defun read-nybble (mem offset)
+(defun readnybble (mem offset)
   0)
 
-(defun read-b (mem offset)
+(defun readbyte (mem offset)
   0)
 
-(defun read-word (mem offset)
+(defun readword (mem offset)
   0)
 
-(defun read-long-word (mem offset)
+(defun readlongword (mem offset)
   0)
 
 (defgeneric write-memory (mem offset size data)
