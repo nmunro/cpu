@@ -31,7 +31,7 @@
 (defmethod move.b (vm (location number) val)
   (multiple-value-bind (x y)
       (floor location)
-    (setf (aref (locations (memory vm)) y x) val)))
+    (write-memory (memory vm) y x val)))
 
 (defun nop (vm))
 
@@ -49,10 +49,11 @@
          (cl-user::quit))
 
         ((= 13 trap-task)
-         (format t "~A~%" (address (memory vm) (val (register :d0 (cpu vm))))))
+         (let ((addr (val (register :a1 (cpu vm)))))
+           (format t "~A~%" (read-string (memory vm) 0))))
 
         ((= 14 trap-task)
-         (format t "~A"   (address (memory vm) (val (register :d0 (cpu vm))))))))))
+         (format t "~A" (val (register :a1 (cpu vm)))))))))
 
 (defun add (vm destination source1 source2)
   (setf (val    (register destination (cpu vm)))

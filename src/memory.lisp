@@ -3,6 +3,7 @@
   (:export #:memory
            #:locations
            #:size
+           #:display-memory
            #:write-memory
            #:read-memory
            #:make-memory))
@@ -36,8 +37,17 @@
       (push (aref (locations mem) offset x 0) data))
     (format nil "~A" (reverse data))))
 
-(defun write-memory (mem offset size data)
-  (let ((hexes (mapcar (lambda (c) (char->hex c)) (coerce data 'list))))
+(defgeneric write-memory (mem offset size data)
+  (:documentation "Writes data to memory"))
+
+(defmethod write-memory (mem offset size (data number))
+  (write-memory mem offset size (format nil "~X" data)))
+
+(defmethod write-memory (mem offset size (data character))
+  (write-memory mem offset size (format nil "~A" data)))
+
+(defmethod write-memory (mem offset size (data string))
+  (let ((hexes (mapcar (lambda (c) (char->hex c)) (append (coerce data 'list) '(#\Nul)))))
     (dolist (hex hexes)
       (setf (aref (locations mem) offset size 0) hex)
       (if (= 15 size)
