@@ -31,38 +31,15 @@
     (ascii-table:display tbl)))
 
 (defun read-memory (mem offset size)
-  (let ((data (aref (locations mem) offset size 0)))
-    (format nil "~A" data)))
+  (let ((data '()))
+    (dotimes (x size)
+      (push (aref (locations mem) offset x 0) data))
+    (format nil "~A" (reverse data))))
 
-(defun readbit (mem offset)
-  0)
-
-(defun readnybble (mem offset)
-  0)
-
-(defun readbyte (mem offset)
-  0)
-
-(defun readword (mem offset)
-  0)
-
-(defun readlongword (mem offset)
-  0)
-
-(defgeneric write-memory (mem offset size data)
-  (:documentation "Converts data to hex and writes it into a memory location"))
-
-(defmethod write-memory (mem offset size (data character))
-  (setf (aref (locations mem) offset size 0) data))
-
-(defmethod write-memory (mem offset size (data integer))
-  (setf (aref (locations mem) offset size 0) data))
-
-(defmethod write-memory (mem offset size (data string))
-  ;(setf (aref (locations mem) offset size 0) data))
+(defun write-memory (mem offset size data)
   (let ((hexes (mapcar (lambda (c) (char->hex c)) (coerce data 'list))))
     (dolist (hex hexes)
-      (write-memory mem offset size hex)
+      (setf (aref (locations mem) offset size 0) hex)
       (if (= 15 size)
           (progn
             (setf size 0)
@@ -70,7 +47,9 @@
           (incf size)))))
 
 (let ((mem (make-memory 16)))
-  (write-memory mem 0 0 #\f)
+  (write-memory mem 0 0 "f")
   (write-memory mem 0 15 "hi")
-  (write-memory mem 2 1 #\f)
-  (display-memory mem))
+  (write-memory mem 2 1 "f")
+  (write-memory mem 3 0 "Hi, you ok?")
+  (display-memory mem)
+  (format t "~A~%" (read-memory mem 3 11)))
