@@ -61,5 +61,7 @@
   (write-memory mem 0 15 "hi")
   (write-memory mem 2 1 "f")
   (write-memory mem 3 0 "Hi, you ok?")
+  (write-memory mem 4 0 9)
+  (write-memory mem 4 0 #\N)
   (display-memory mem)
   (format t "~A~%" (read-memory mem 3 11)))
