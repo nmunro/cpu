@@ -11,7 +11,8 @@
 
 (defclass memory ()
   ((size      :initarg :size      :initform (error "Must provide a size")    :reader size)
-   (locations :initarg :locations :initform (error "Must provide locations") :reader locations)))
+   (locations :initarg :locations :initform (error "Must provide locations") :reader locations)
+   (lookup    :initarg :lookup    :initform '()                              :accessor lookup)))
 
 (defun make-memory (size)
   (let ((base-size 16))
@@ -36,6 +37,9 @@
     (dotimes (x size)
       (push (aref (locations mem) offset x 0) data))
     (format nil "~A" (reverse data))))
+
+(defun reserve-memory (mem label offset size data)
+  0)
 
 (defgeneric write-memory (mem offset size data)
   (:documentation "Writes data to memory"))
