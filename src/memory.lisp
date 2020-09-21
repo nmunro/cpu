@@ -1,18 +1,22 @@
 (defpackage cpu.memory
   (:use :cl :cpu.utils)
-  (:export #:memory
+  (:export #:convert-data
+           #:memory
            #:locations
            #:size
            #:display-memory
+           #:reserve-memory
+           #:retrieve-memory
+           #:reclaim-memory
            #:write-memory
-           #:read-memory
+           #:read-string
            #:make-memory))
 (in-package :cpu.memory)
 
 (defclass memory ()
   ((size      :initarg :size      :initform (error "Must provide a size")    :reader size)
    (locations :initarg :locations :initform (error "Must provide locations") :reader locations)
-   (lookup    :initarg :lookup    :initform '()                              :accessor lookup)))
+   (lookup    :initarg :lookup    :initform (make-hash-table)                :accessor lookup)))
 
 (defun make-memory (size)
   (let ((base-size 16))
@@ -32,40 +36,62 @@
         (ascii-table:add-row tbl (append `(,x) (reverse data)))))
     (ascii-table:display tbl)))
 
-(defun read-memory (mem offset size)
-  (let ((data '()))
+(defun read-string (data)
+  (format nil "~A" (coerce (mapcar (lambda (c) (hex->char (parse-integer c :radix 16))) data) 'string)))
+
+(defun reserve-memory (mem label offset address data)
+  (setf (gethash label (lookup mem))
+        `(,offset ,address ,(length (write-memory mem offset address data)))))
+
+(defun retrieve-memory (mem label)
+  (let* ((record (gethash label (lookup mem)))
+         (offset (first record))
+         (address (second record))
+         (size (third record))
+         (data '()))
     (dotimes (x size)
-      (push (aref (locations mem) offset x 0) data))
-    (format nil "~A" (reverse data))))
+      (setf data (append data `(,(aref (locations mem) offset address 0))))
+      (if (= 15 address)
+        (progn
+          (setf address 0)
+          (incf offset))
+        (incf address)))
+    data))
 
-(defun reserve-memory (mem label offset size data)
-  0)
+(defun reclaim-memory (mem label)
+  (remhash label (lookup mem)))
 
-(defgeneric write-memory (mem offset size data)
-  (:documentation "Writes data to memory"))
+(defgeneric convert-data (data)
+  (:documentation "Converts data to raw hexadecimal bits"))
 
-(defmethod write-memory (mem offset size (data number))
-  (write-memory mem offset size (format nil "~X" data)))
+(defmethod convert-data ((data number))
+  (convert-data (format nil "~X" data)))
 
-(defmethod write-memory (mem offset size (data character))
-  (write-memory mem offset size (format nil "~A" data)))
+(defmethod convert-data ((data character))
+  (convert-data (format nil "~A" data)))
 
-(defmethod write-memory (mem offset size (data string))
-  (let ((hexes (mapcar (lambda (c) (char->hex c)) (append (coerce data 'list) '(#\Nul)))))
+(defmethod convert-data ((data string))
+  (mapcar (lambda (c) (char->hex c)) (coerce data 'list)))
+
+(defun write-memory (mem offset address data)
+  (let ((hexes (convert-data data)))
     (dolist (hex hexes)
-      (setf (aref (locations mem) offset size 0) hex)
-      (if (= 15 size)
+      (setf (aref (locations mem) offset address 0) hex)
+      (if (= 15 address)
           (progn
-            (setf size 0)
+            (setf address 0)
             (incf offset))
-          (incf size)))))
+          (incf address)))
+    hexes))
 
 (let ((mem (make-memory 16)))
-  (write-memory mem 0 0 "f")
-  (write-memory mem 0 15 "hi")
-  (write-memory mem 2 1 "f")
-  (write-memory mem 3 0 "Hi, you ok?")
-  (write-memory mem 4 0 9)
-  (write-memory mem 4 0 #\N)
+  (write-memory mem 0 0 "Hi, you ok?")
+  (write-memory mem 1 0 9)
+  (write-memory mem 2 0 #\N)
+  (reserve-memory mem 'greeting 3 0 "Hey")
+  (reserve-memory mem 'msg 7 0 "Hope you are ok!!!")
   (display-memory mem)
-  (format t "~A~%" (read-memory mem 3 11)))
+  (format t "~A~%" (read-string (retrieve-memory mem 'greeting)))
+  (format t "~A~%" (read-string (retrieve-memory mem 'msg)))
+  (reclaim-memory mem 'greeting)
+  (reclaim-memory mem 'msg))
