@@ -1,6 +1,7 @@
 (defpackage cpu.instructions
   (:use :cl :cpu.cpu :cpu.memory)
   (:export #:move.b
+           #:def
            #:lea
            #:nop
            #:trap
@@ -9,6 +10,9 @@
            #:mul
            #:div))
 (in-package :cpu.instructions)
+
+(defun def (vm label val)
+  (reserve-memory (memory vm) label #x0 val))
 
 (defgeneric move (vm location val)
   (:documentation "Moves a bit sized value into either memory or a cpu register"))
@@ -31,15 +35,16 @@
 (defmethod move.b (vm (location number) val)
   (multiple-value-bind (x y)
       (floor location)
-    (setf (aref (locations (memory vm)) y x) val)))
+    (write-memory (memory vm) y x val)))
 
 (defun nop (vm))
 
 (defun dc.b (vm label data)
   0)
 
-(defun lea (vm src dest)
-  (setf (val (register dest (cpu vm))) src))
+(defun lea (vm label dest)
+  (let* ((start (find-start-address (memory vm) label)))
+    (setf (val (register dest (cpu vm))) start)))
 
 (defun trap (vm trap-code)
   (when (= #xf trap-code)
@@ -49,10 +54,12 @@
          (cl-user::quit))
 
         ((= 13 trap-task)
-         (format t "~A~%" (address (memory vm) (val (register :d0 (cpu vm))))))
+         (let ((start-addr (val (register :a1 (cpu vm)))))
+           (format t "~A~%" (read-string-at (memory vm) start-addr))))
 
         ((= 14 trap-task)
-         (format t "~A"   (address (memory vm) (val (register :d0 (cpu vm))))))))))
+         (let ((start-addr (val (register :a1 (cpu vm)))))
+           (format t "~A" (read-string-at (memory vm) start-addr))))))))
 
 (defun add (vm destination source1 source2)
   (setf (val    (register destination (cpu vm)))

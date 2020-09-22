@@ -2,7 +2,7 @@
   :version "0.1.0"
   :author ""
   :license ""
-  :depends-on ()
+  :depends-on ("cl-ascii-table")
   :components ((:module "src"
                 :components
                 ((:file "utils")
