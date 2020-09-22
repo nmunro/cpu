@@ -23,4 +23,4 @@
     (format t "~A~%" reg)))
 
 (defun show-memory (vm)
-  (format t "~A~%" (locations (memory vm))))
+  (display-memory (memory vm)))

@@ -1,6 +1,7 @@
 (defpackage cpu.memory
   (:use :cl :cpu.utils)
   (:export #:convert-data
+           #:find-start-address
            #:memory
            #:locations
            #:size
@@ -10,6 +11,7 @@
            #:reclaim-memory
            #:write-memory
            #:read-string
+           #:read-string-at
            #:make-memory))
 (in-package :cpu.memory)
 
@@ -39,23 +41,24 @@
 (defun read-string (data)
   (format nil "~A" (coerce (mapcar (lambda (c) (hex->char (parse-integer c :radix 16))) data) 'string)))
 
-(defun reserve-memory (mem label offset address data)
+(defun read-string-at (mem address)
+  (let ((obj (find-by-start-address mem address)))
+    (read-string (retrieve-memory mem obj))))
+
+(defun reserve-memory (mem label address data)
   (setf (gethash label (lookup mem))
-        `(,offset ,address ,(length (write-memory mem offset address data)))))
+        `(,(format nil "~X" address) ,(length (write-memory mem address data)))))
 
 (defun retrieve-memory (mem label)
   (let* ((record (gethash label (lookup mem)))
-         (offset (first record))
-         (address (second record))
-         (size (third record))
+         (start-address (parse-integer (first record) :radix 16))
+         (size (second record))
          (data '()))
     (dotimes (x size)
-      (setf data (append data `(,(aref (locations mem) offset address 0))))
-      (if (= 15 address)
-        (progn
-          (setf address 0)
-          (incf offset))
-        (incf address)))
+      (multiple-value-bind (offset address)
+          (get-offset-and-address start-address)
+        (setf data (append data `(,(aref (locations mem) offset address 0))))
+        (incf start-address)))
     data))
 
 (defun reclaim-memory (mem label)
@@ -73,25 +76,49 @@
 (defmethod convert-data ((data string))
   (mapcar (lambda (c) (char->hex c)) (coerce data 'list)))
 
-(defun write-memory (mem offset address data)
-  (let ((hexes (convert-data data)))
-    (dolist (hex hexes)
-      (setf (aref (locations mem) offset address 0) hex)
-      (if (= 15 address)
+(defun write-memory (mem addr data)
+  (multiple-value-bind (offset address)
+      (get-offset-and-address addr)
+    (let ((hexes (convert-data data)))
+      (dolist (hex hexes)
+        (setf (aref (locations mem) offset address 0) hex)
+        (if (= 15 address)
           (progn
             (setf address 0)
             (incf offset))
           (incf address)))
-    hexes))
+    hexes)))
 
-(let ((mem (make-memory 16)))
-  (write-memory mem 0 0 "Hi, you ok?")
-  (write-memory mem 1 0 9)
-  (write-memory mem 2 0 #\N)
-  (reserve-memory mem 'greeting 3 0 "Hey")
-  (reserve-memory mem 'msg 7 0 "Hope you are ok!!!")
-  (display-memory mem)
-  (format t "~A~%" (read-string (retrieve-memory mem 'greeting)))
-  (format t "~A~%" (read-string (retrieve-memory mem 'msg)))
-  (reclaim-memory mem 'greeting)
-  (reclaim-memory mem 'msg))
+(defun find-by-start-address (mem address)
+  ;; Loop and find the variable that starts at 'start'
+  (loop for k being the hash-keys of (lookup mem)
+        for v being the hash-values of (lookup mem)
+        do (when (= address (parse-integer (first v) :radix 16))
+            (return-from find-by-start-address k))))
+
+(defun find-start-address (mem label)
+  (parse-integer (first (gethash label (lookup mem))) :radix 16))
+
+(defun get-offset-and-address (addr)
+  (multiple-value-bind (offset address)
+      (truncate addr 16)
+    (values offset address)))
+
+;(let ((mem (make-memory 16)))
+;  (write-memory mem #x0 "Hi, you ok?")
+;  (write-memory mem #x10 9)
+;  (write-memory mem #x20 #\N)
+;  (reserve-memory mem 'greeting #x30 "Hey")
+;  (reserve-memory mem 'msg #x70 "Hope you are ok!!!")
+; (display-memory mem)
+; (format t "Debug 1: ~A~%" (retrieve-memory mem 'greeting))
+; (format t "Debug 2: ~A~%" (read-string (retrieve-memory mem 'greeting)))
+; (format t "Debug 3: ~A~%" (find-by-start-address mem #x30))
+; (format t "Debug 4: ~X~%" (find-start-address mem 'msg))
+; (format t "Debug 5: ~A~%" (read-string (retrieve-memory mem 'msg)))
+; (format t "Debug 6: ~A~%" (get-address mem #x10))
+; (format t "Debug 7: ~A~%" (get-data mem #x70 18))
+; (format t "Debug 8: ~A~%" (read-string-at mem #x70))
+; (reclaim-memory mem 'greeting)
+; (reclaim-memory mem 'msg)
+; (format t "Done!~%"))
