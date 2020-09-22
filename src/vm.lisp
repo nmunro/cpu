@@ -2,7 +2,6 @@
   (:use :cl :cpu.cpu :cpu.memory)
   (:export #:vm
            #:make-vm
-           #:with-vm
            #:show-registers
            #:show-memory))
 (in-package :cpu.vm)
@@ -19,8 +18,7 @@
     (format stream "Virtual Machine: ~A/~A " (cpu vm) (memory vm))))
 
 (defun show-registers (vm)
-  (dolist (reg (registers (cpu vm)))
-    (format t "~A~%" reg)))
+  (display-registers (cpu vm)))
 
 (defun show-memory (vm)
   (display-memory (memory vm)))

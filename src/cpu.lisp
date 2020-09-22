@@ -3,6 +3,7 @@
   (:export #:cpu-register
            #:make-register
            #:make-registers
+           #:display-registers
            #:register
            #:cpu
            #:make-cpu
@@ -58,3 +59,9 @@
 (defmethod print-object ((cpu cpu) stream)
   (print-unreadable-object (cpu stream)
     (format stream "CPU: ~A (~A ~A), word-length: ~A" (name cpu) (clock-speed cpu) (clock-range cpu) (word-length cpu))))
+
+(defun display-registers (cpu)
+  (let ((tbl (ascii-table:make-table '("Name" "Value") :header "Registers")))
+    (dolist (reg (registers cpu))
+      (ascii-table:add-row tbl `(,(name reg) ,(val reg))))
+    (ascii-table:display tbl)))
