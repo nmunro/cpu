@@ -2,6 +2,7 @@
   (:use :cl :cpu.cpu :cpu.memory)
   (:export #:vm
            #:make-vm
+           #:with-vm
            #:show-registers
            #:show-memory))
 (in-package :cpu.vm)
@@ -22,3 +23,7 @@
 
 (defun show-memory (vm)
   (display-memory (memory vm)))
+
+(defmacro with-vm ((name obj) &body body)
+  `(progn
+    ,@(mapcar (lambda (form) (append `(,(car form) ,obj) (cdr form))) body)))

@@ -8,25 +8,27 @@
 (in-package :cpu)
 
 (defun main ()
+  (format t "+-------------------------------------------------------------------------------------------+~%")
+  (format t "|                                                                                           |~%")
+  (format t "| Developed by NMunro, copyright 2020                                                       |~%")
+  (format t "|                                                                                           |~%")
+  (format t "+-------------------------------------------------------------------------------------------+~%")
+
   (let ((vm (make-vm (make-cpu :mtech1 (make-registers :a0 :a1 :a2 :a3 :a4 :a5 :a6 :a7 :d0 :d1 :d2 :d3 :d4 :d5 :d6 :d7) 8 :mhz)
                      (make-memory 16))))
-      (format t "+-------------------------------------------------------------------------------------------+~%")
-      (format t "| Developed by NMunro, copyright 2020                                                       |~%")
-      (format t "|                                                                                           |~%")
-      (format t "| ~A    |~%" vm)
-      (format t "+-------------------------------------------------------------------------------------------+~%")
+    (with-vm (vm vm)
+      (print)
+      (def :message "hello world")
+      (lea :message :a1)
+      (move.b :d0 13)
+      (trap #xf)
+      (move.b :d0 9)
 
-      (def vm :message "hello world")
-      (lea vm :message :a1)
-      (move.b vm :d0 13)
-      (trap vm #xf)
-      (move.b vm :d0 9)
+      (show-registers)
+      (show-memory)
 
-      (show-registers vm)
-      (show-memory vm)
+      (trap #xf))
 
-      (trap vm #xf)
-
-      ; Keeps cpu idling if it wasn't halted
-      (do () (nil)
-        (nop))))
+    ; Keeps cpu idling if it wasn't halted
+    (do () (nil)
+      (nop))))
