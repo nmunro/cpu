@@ -14,12 +14,6 @@
 (defun def (vm label val)
   (reserve-memory (memory vm) label #x0 val))
 
-(defgeneric move (vm location val)
-  (:documentation "Moves a bit sized value into either memory or a cpu register"))
-
-(defgeneric move.n (vm location val)
-  (:documentation "Moves a nybble sized value into either memory or a cpu register"))
-
 (defgeneric move.b (vm location val)
   (:documentation "Moves a bytes sized value into either memory or a cpu register"))
 
