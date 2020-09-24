@@ -40,8 +40,7 @@
    (run-speed         :initarg :speed             :initform (error "Must provide a speed")           :reader run-speed)
    (clock-range       :initarg :clock-range       :initform :mhz                                     :reader clock-range)
    (clock-speed       :initarg :clock-speed       :initform 8                                        :reader clock-speed)
-   (registers         :initarg :registers         :initform (error "Must provide registers")         :reader registers)
-   (program-counter   :initarg :program-counter   :initform 0                                        :reader program-counter)))
+   (registers         :initarg :registers         :initform (error "Must provide registers")         :reader registers)))
 
 (defun make-cpu (name registers speed unit)
   (cond
