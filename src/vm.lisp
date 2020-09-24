@@ -24,6 +24,16 @@
 (defun show-memory (vm)
   (display-memory (memory vm)))
 
-(defmacro with-vm ((vm) &body body)
+(defun repeat (times form)
+  (loop for i upto (1- times) collect form))
+
+(defun mix (l1 l2)
+  (let ((data nil))
+    (mapc (lambda (&rest forms) (setf data (append data forms))) l1 l2)
+    data))
+
+(defmacro with-vm ((vm speed) &body body)
   `(progn
-    ,@(mapcar (lambda (form) (append `(,(car form) ,vm) (cdr form))) body)))
+    ,@(mix
+       (mapcar (lambda (form) (append `(,(car form) ,vm) (cdr form))) body)
+       (repeat (length body) `(sleep ,speed)))))
