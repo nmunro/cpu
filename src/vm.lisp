@@ -24,6 +24,6 @@
 (defun show-memory (vm)
   (display-memory (memory vm)))
 
-(defmacro with-vm ((name obj) &body body)
+(defmacro with-vm ((vm) &body body)
   `(progn
-    ,@(mapcar (lambda (form) (append `(,(car form) ,obj) (cdr form))) body)))
+    ,@(mapcar (lambda (form) (append `(,(car form) ,vm) (cdr form))) body)))
