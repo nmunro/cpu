@@ -1,15 +1,18 @@
 (defpackage cpu.cpu
   (:use :cl)
-  (:export #:cpu-register
+  (:export #:clock-range
+           #:clock-speed
+           #:cpu
+           #:cpu-register
+           #:display-registers
+           #:get-register
+           #:make-cpu
            #:make-register
            #:make-registers
-           #:display-registers
            #:register
-           #:cpu
-           #:make-cpu
            #:registers
-           #:val
-           #:get-register))
+           #:run-speed
+           #:val))
 (in-package :cpu.cpu)
 
 (defclass cpu-register ()
@@ -34,16 +37,11 @@
 
 (defclass cpu ()
   ((name              :initarg :name              :initform (error "Must provide a name")            :reader name)
-   (speed             :initarg :speed             :initform (error "Must provide a speed"            :reader speed))
+   (run-speed         :initarg :speed             :initform (error "Must provide a speed")           :reader run-speed)
    (clock-range       :initarg :clock-range       :initform :mhz                                     :reader clock-range)
    (clock-speed       :initarg :clock-speed       :initform 8                                        :reader clock-speed)
    (registers         :initarg :registers         :initform (error "Must provide registers")         :reader registers)
-   (program-counter   :initarg :program-counter   :initform 0                                        :reader program-counter)
-   (bit               :initarg :bit               :initform 1                                        :reader bit-length)
-   (nybble            :initarg :nybble            :initform 4                                        :reader nybble-length)
-   (byte              :initarg :byte              :initform 8                                        :reader byte-length)
-   (word              :initarg :word              :initform 16                                       :reader word-length)
-   (long-word         :initarg :long-word         :initform 32                                       :reader long-word-length)))
+   (program-counter   :initarg :program-counter   :initform 0                                        :reader program-counter)))
 
 (defun make-cpu (name registers speed unit)
   (cond
@@ -58,7 +56,7 @@
 
 (defmethod print-object ((cpu cpu) stream)
   (print-unreadable-object (cpu stream)
-    (format stream "CPU: ~A (~A ~A), word-length: ~A" (name cpu) (clock-speed cpu) (clock-range cpu) (word-length cpu))))
+    (format stream "CPU: ~A (~A ~A)" (name cpu) (clock-speed cpu) (clock-range cpu))))
 
 (defun display-registers (cpu)
   (let ((tbl (ascii-table:make-table '("Name" "Value") :header "Registers")))

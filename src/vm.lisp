@@ -32,6 +32,8 @@
     (mapc (lambda (&rest forms) (setf data (append data forms))) l1 l2)
     data))
 
-(defmacro with-vm ((vm) &body body)
+(defmacro with-vm ((vm speed) &body body)
   `(progn
-    ,@(mix (mapcar (lambda (form) (append `(,(car form) ,vm) (cdr form))) body) (repeat (length body) '(sleep 1)))))
+    ,@(mix
+       (mapcar (lambda (form) (append `(,(car form) ,vm) (cdr form))) body)
+       (repeat (length body) `(sleep ,speed)))))
