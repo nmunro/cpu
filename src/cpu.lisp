@@ -46,7 +46,7 @@
 (defun make-cpu (name registers speed unit)
   (cond
     ((eq unit :hz)
-     (make-instance 'cpu :name name :registers registers :speed (/ speed 1) :clock-range unit :clock-speed speed))
+     (make-instance 'cpu :name name :registers registers :speed (/ 1 speed) :clock-range unit :clock-speed speed))
 
     ((eq unit :khz)
      (make-instance 'cpu :name name :registers registers :speed (/ speed 1000) :clock-range unit :clock-speed speed))
