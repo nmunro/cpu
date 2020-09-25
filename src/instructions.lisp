@@ -1,7 +1,7 @@
 (defpackage cpu.instructions
   (:use :cl :cpu.cpu :cpu.memory)
   (:export #:move.b
-           #:def
+           #:dc.b
            #:lea
            #:nop
            #:trap
@@ -10,9 +10,6 @@
            #:mul
            #:div))
 (in-package :cpu.instructions)
-
-(defun def (vm label val)
-  (reserve-memory (memory vm) label #x0 val))
 
 (defgeneric move.b (vm location val)
   (:documentation "Moves a bytes sized value into either memory or a cpu register"))
@@ -34,7 +31,7 @@
 (defun nop (vm))
 
 (defun dc.b (vm label data)
-  0)
+  (reserve-memory (memory vm) label #x0 data))
 
 (defun lea (vm label dest)
   (let* ((start (find-start-address (memory vm) label)))
