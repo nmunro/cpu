@@ -45,6 +45,15 @@
   (let ((obj (find-by-start-address mem address)))
     (read-string (retrieve-memory mem obj))))
 
+(defun reserve-byte ()
+  0)
+
+(defun reserve-word ()
+  0)
+
+(defun reserve-long ()
+  0)
+
 (defun reserve-memory (mem label address data)
   (setf (gethash label (lookup mem))
         `(,(format nil "~X" address) ,(length (write-memory mem address data)))))
@@ -75,6 +84,15 @@
 
 (defmethod convert-data ((data string))
   (mapcar (lambda (c) (char->hex c)) (coerce data 'list)))
+
+(defun write-b ()
+  0)
+
+(defun write-w ()
+  0)
+
+(defun write-l ()
+  0)
 
 (defun write-memory (mem addr data)
   (multiple-value-bind (offset address)
