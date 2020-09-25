@@ -19,7 +19,7 @@
     (format t "CPU: ~A~%" (cpu vm))
 
     (with-vm (vm (run-speed (cpu vm)))
-      (def :message "hello world")
+      (dc.b :message "hello world")
       (lea :message :a1)
       (move.b :d0 13)
       (trap #xf)
