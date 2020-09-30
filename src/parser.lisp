@@ -11,13 +11,13 @@
     (format t "~{~A~^, ~}~%" line)))
 
 (defun translate (line)
-  `(,(getf line :label) ,(getf line :function) ,(getf line :args)))
+  `(,(getf line :label) ,(getf line :function) ,@(uiop:split-string (first (getf line :args)) :separator ",")))
 
 (defun parse-line (line)
   (let ((data (remove-if #'(lambda (x) (string= x "")) (uiop:split-string line :separator " ") :start 1)))
     (translate `(:label    ,(first data)
-                 :function ,(cadr data)
-                 :args     ,@(uiop:split-string (first (cdr (remove-if (lambda (word) (string= "" word)) (rest data)))) :separator ",")))))
+                :function ,(cadr data)
+                :args     ,(cdr (remove-if (lambda (word) (string= "" word)) (rest data)))))))
 
 (defun remove-junk (line)
   (cond
