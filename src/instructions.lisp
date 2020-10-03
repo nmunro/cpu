@@ -11,14 +11,15 @@
            #:div))
 (in-package :cpu.instructions)
 
-(defparameter functions '("lea"  "move.l" "move.w" "move.b" "trap"
-                          "dc.b" "add"    "abcd"   "meh"    "nop"
-                          "sub"  "mul"    "div"))
+(defparameter functions '("nop"  "lea"    "move.l" "move.w" "move.b"
+                          "trap" "dc.b"   "dc.w"   "dc.l"   "add"
+                          "abcd" "meh"    "sub"    "mul"    "div"
+                          "end"  "org"))
 
 (defun lookup (instruction &key (reverse nil))
   (if reverse
     (nth (parse-integer instruction :radix 16) functions)
-    (format nil "~X" (position instruction functions :test #'equal))))
+    (format nil "~2,'0X" (position instruction functions :test #'equalp))))
 
 (defgeneric move.b (vm location val)
   (:documentation "Moves a bytes sized value into either memory or a cpu register"))

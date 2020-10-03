@@ -1,5 +1,5 @@
 (defpackage cpu.parser
-  (:use :cl))
+  (:use :cl :cpu.instructions))
 (in-package :cpu.parser)
 
 (defun read-file (path)
@@ -11,12 +11,15 @@
     (format t "~{~A~^, ~}~%" line)))
 
 (defun translate (line)
-  `(,(getf line :label) ,(getf line :function) ,@(uiop:split-string (first (getf line :args)) :separator ",")))
+  ; The following has a bug when using DC.B
+  `(,(getf line :label)
+    ,(getf line :function)
+    ,@(uiop:split-string (getf line :args) :separator ",")))
 
 (defun parse-line (line)
   (let ((data (remove-if #'(lambda (x) (string= x "")) (uiop:split-string line :separator " ") :start 1)))
-    (translate `(:label    ,(first data)
-                :function ,(cadr data)
+    (translate `(:label   ,(car data)
+                :function ,(lookup (cadr data))
                 :args     ,(cdr (remove-if (lambda (word) (string= "" word)) (rest data)))))))
 
 (defun remove-junk (line)
@@ -31,3 +34,6 @@
 
 (let ((code (read-file #p"~/quicklisp/local-projects/cpu/examples/hello-world.asm")))
     (map-to-memory (mapcar #'parse-line (remove-if (complement #'remove-junk) code))))
+
+(lookup "end")
+(lookup (lookup "div") :reverse t)
